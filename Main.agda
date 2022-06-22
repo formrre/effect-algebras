@@ -30,6 +30,11 @@ exampleA1 = Impure (⊥ , Throw , (\_ -> Pure 0))
 open import Data.Maybe
 
 
+-- Example reasoning principle
+--
+-- deadCodeTransformation : forall {k k'}
+--                      -> interp (Impure (⊥ , Throw , k)) ≡ interp (Impure (⊥ , Throw , k'))
+
 
 
 -- ## 2. State
