@@ -22,8 +22,10 @@ data Free (F : Set -> Set) : Set -> Set where
 
 -- Section 1 shows how inconsistency falls out from this construction,
 -- but first splitting it into a general fixed point on type
--- constructors. Section 2 shows how this comes out as a failure to
--- have all colimits in type theory.
+-- constructors. Section 2 shows how this failure to define Free is
+-- a consequence of the fact that in type theory we do not have all
+-- colimits: we cannot define the colimit of an initial algebra chain
+-- formed from repeated application of a constructor to itself.
 
 -- # 1. From general fixed point to inconsistenvy
 
@@ -82,35 +84,35 @@ initialAlgebraChain F (suc n) =
   F (initialAlgebraChain F n)
 
 -- with maps
-intialAlgebraChainHomom : (F : Set -> Set) (fmap : Fmap F)
- -> forall {i j : ℕ} {prf : i < j}
+intialAlgebraChainHomom : (F : Set -> Set) {fmap : Fmap F}
+ -> (i j : ℕ) -> {prf : i < j}
  -> initialAlgebraChain F i -> initialAlgebraChain F j
-intialAlgebraChainHomom F fmap {zero} {zero} {()}
-intialAlgebraChainHomom F fmap {zero} {suc zero} {s≤s z≤n} = λ ()
-intialAlgebraChainHomom F fmap {suc i} {suc j} {s≤s prf} = fmap (intialAlgebraChainHomom F fmap {i} {j} {prf})
+intialAlgebraChainHomom F {fmap} zero zero {()}
+intialAlgebraChainHomom F {fmap} zero (suc zero) {s≤s z≤n} = λ ()
+intialAlgebraChainHomom F {fmap} (suc i) (suc j) {s≤s prf} = fmap (intialAlgebraChainHomom F {fmap} i j {prf})
 
--- This chain has a colimit:
--- i.e., W 0 + (W 1 + (W 2 + ...)))
--- i.e., 0 + (F + (F .F + ...))
--- but it is NOT (WELL-)DEFINED IN TYPE THEORY which is the problem
-{-# TERMINATING #-}
-colimitChain : (W : ℕ -> Set) -> Set
-colimitChain W = W 0 ⊎ colimitChain (\x -> W (suc x))
+initialAlgebraCarrier : (F : Set -> Set) -> Set
+initialAlgebraCarrier F = Σ ℕ (initialAlgebraChain F)
 
-postulate
-  prf : {F : Set -> Set}
-    -> colimitChain (\x -> F (initialAlgebraChain F x))
-       ≡ F (colimitChain (initialAlgebraChain F))
+-- For an F-algebra `(Y, ρ : F Y -> Y)` there is a colimit
+-- from the chain on F to Y
+colimitInj : (F : Set -> Set) {fmap : Fmap F}
+          -> (Y : Set)        -- Algebra carrier
+          -> (ρ : F Y -> Y)   -- Algebra structure map
+          -> (i : ℕ)
+          -> initialAlgebraChain F i -> Y
+colimitInj F {fmap} Y ρ zero    ()
+colimitInj F {fmap} Y ρ (suc i) x = ρ (fmap (colimitInj F {fmap} Y ρ i) x)
 
--- Injections into the colimit of our initial algebra chain
-colimitInj : {F : Set -> Set} {fmap : Fmap F} {i : ℕ}
-  -> initialAlgebraChain F i -> colimitChain (initialAlgebraChain F)
-colimitInj {F} {fmap} {zero} x = inj₁ x
-colimitInj {F} {fmap} {suc i} x rewrite prf {F} =
-  inj₂ (fmap (colimitInj {F} {fmap} {i}) x)
+refl≤ : forall {i} -> i Data.Nat.≤ i
+refl≤ {zero} = z≤n
+refl≤ {suc i} = s≤s refl≤
 
-isColimit : {F : Set -> Set} {fmap : Fmap F} {i j : ℕ} {prf : i < j}
-          -> (x : F i)
-          -> colimitInj {F} {fmap} {i} x
-          ≡ colimitInj {F} {fmap} {j} (intialAlgebraChainHomom {i} {j} {prf} x)
-isColimit {F} {i} {j} {prf} x = ?
+-- Proof that the above really is a colimit (i.e., we have a family of co-cones)
+isColimit : (F : Set -> Set) {fmap : Fmap F} (i : ℕ)
+          -> (Y : Set) (ρ : F Y -> Y) -- Algebra
+          -> (x : initialAlgebraChain F i)
+          -> colimitInj F {fmap} Y ρ i x
+          ≡ colimitInj F {fmap} Y ρ (suc i) (intialAlgebraChainHomom F {fmap} i (suc i) {s≤s refl≤} x)
+isColimit F {fmap} zero Y ρ ()
+isColimit F {fmap} (suc i) Y ρ x = ? -- Not sure how to prove this.
