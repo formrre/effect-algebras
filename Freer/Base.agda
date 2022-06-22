@@ -21,4 +21,8 @@ data Freer {l1 l2 l3 : _} (G : Set l1 → Set l2) (A : Set l3) : Set (lsuc l1 �
    Pure   : A → Freer G A
    Impure : Lan G (Freer G A) → Freer G A
 
+-- 'Iteration principle', i.e., how to fold a syntax tree
 
+interpret : ∀ {l1 l3} {E : Set l1 -> Set l3} {x : Set (lsuc l1)} → (Lan E x → x) → (Freer E x → x)
+interpret f (Pure x) = x
+interpret f (Impure (type , arg , kont)) = f (type , arg , λ z → interpret f (kont z))

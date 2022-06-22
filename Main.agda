@@ -15,14 +15,21 @@ open import Data.Nat
 -- ## 1. Exceptions
 
 -- Signature of exception operations
+
 data Exception : Set -> Set where
   Throw : Exception ⊥
 
 -- Syntax tree of a computation which fails and then returns 0.
+
 exampleA1 : Freer Exception ℕ
 exampleA1 = Impure (⊥ , Throw , (\_ -> Pure 0))
 
--- A standard interpretation for this would mean that the 0 is never produced.
+-- A standard interpretation  for this would mean that the  0 is never
+-- output.
+
+open import Data.Maybe
+
+
 
 
 -- ## 2. State
