@@ -94,6 +94,7 @@ intialAlgebraChainHomom F {fmap} (suc i) (suc j) {s≤s prf} = fmap (intialAlgeb
 initialAlgebraCarrier : (F : Set -> Set) -> Set
 initialAlgebraCarrier F = Σ ℕ (initialAlgebraChain F)
 
+-- See section 6.3 of https://core.ac.uk/download/pdf/141471082.pdf
 -- For an F-algebra `(Y, ρ : F Y -> Y)` there is a colimit
 -- from the chain on F to Y
 colimitInj : (F : Set -> Set) {fmap : Fmap F}
@@ -115,4 +116,4 @@ isColimit : (F : Set -> Set) {fmap : Fmap F} (i : ℕ)
           -> colimitInj F {fmap} Y ρ i x
           ≡ colimitInj F {fmap} Y ρ (suc i) (intialAlgebraChainHomom F {fmap} i (suc i) {s≤s refl≤} x)
 isColimit F {fmap} zero Y ρ ()
-isColimit F {fmap} (suc i) Y ρ x = ? -- Not sure how to prove this.
+isColimit F {fmap} (suc i) Y ρ x = {!!} -- Not sure how to prove this.
